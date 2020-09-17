@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader
 from src.dataloader import SODLoader
 from src.model import SODModel
 from src.loss import EdgeSaliencyLoss
+import math
 
 
 def parse_arguments():
@@ -26,7 +27,7 @@ def parse_arguments():
     parser.add_argument('--aug', default=True, help='Whether to use Image augmentation', type=bool)
     parser.add_argument('--n_worker', default=2, help='Number of workers to use for loading data', type=int)
     parser.add_argument('--test_interval', default=2, help='Number of epochs after which to test the weights', type=int)
-    parser.add_argument('--save_interval', default=None, help='Number of epochs after which to save the weights. If None, does not save', type=int)
+    parser.add_argument('--save_interval', default=2, help='Number of epochs after which to save the weights. If None, does not save', type=int)
     parser.add_argument('--save_opt', default=False, help='Whether to save optimizer along with model weights or not', type=bool)
     parser.add_argument('--log_interval', default=250, help='Logging interval (in #batches)', type=int)
     parser.add_argument('--res_mod', default=None, help='Path to the model to resume from', type=str)
@@ -119,7 +120,7 @@ class Engine:
                                   ca_act_reg))
 
             # Validation
-            if epoch % self.test_interval == 0 or epoch % self.save_interval == 0:
+            if math.fmod(epoch, self.test_interval) == 0 or math.fmod(epoch, self.save_interval) == 0:
                 te_avg_loss, te_acc, te_pre, te_rec, te_mae = self.test()
                 mod_chkpt = {'epoch': epoch,
                             'test_mae' : float(te_mae),
